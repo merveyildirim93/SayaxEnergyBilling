@@ -15,7 +15,7 @@ public class TaxController : ControllerBase
         _taxService = taxService;
     }
 
-    [HttpGet("btv-report")]
+    [HttpPost("GetBtvReport")]
     public ActionResult<List<BtvReportDto>> GetBtvReport([FromQuery] DateTime month)
     {
         var result = _taxService.GetBtvReport(month);
