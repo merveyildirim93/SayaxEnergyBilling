@@ -1,0 +1,6 @@
+@Sayax.API_HostAddress = http://localhost:5134
+
+GET {{Sayax.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
