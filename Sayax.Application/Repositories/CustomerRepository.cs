@@ -14,7 +14,7 @@ public class CustomerRepository : ICustomerRepository
         _context = context;
     }
 
-    public Customer? GetCustomerById(int id)
+    public async Task<Customer?> GetCustomerById(int id)
     {
         return _context.Customers
             .Where(c => c.Id == id)
@@ -26,5 +26,10 @@ public class CustomerRepository : ICustomerRepository
                     .Where(m => m.CustomerId == c.Id)
                     .ToList()
             }).FirstOrDefault();
+    }
+
+    public async Task<List<Customer>> GetAllCustomersAsync()
+    {
+        return _context.Customers.ToList();
     }
 }

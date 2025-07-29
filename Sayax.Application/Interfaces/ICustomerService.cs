@@ -1,4 +1,5 @@
 ﻿using Sayax.Application.DTOs;
+using Sayax.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Sayax.Application.Interfaces
 {
-    public interface ITaxService
+    public interface ICustomerService
     {
-        Task<List<BtvReportDto>> GetBtvReportAsync(DateTime period);
+        Task<List<Customer>> GetAllCustomers();
     }
 }

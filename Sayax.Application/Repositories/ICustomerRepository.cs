@@ -9,6 +9,7 @@ namespace Sayax.Application.Repositories
 {
     public interface ICustomerRepository
     {
-        Customer? GetCustomerById(int id);
+        Task<Customer?> GetCustomerById(int id);
+        Task<List<Customer>> GetAllCustomersAsync();
     }
 }

@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sayax.Domain", "Sayax.Domai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sayax.Infrastructure", "Sayax.Infrastructure\Sayax.Infrastructure.csproj", "{02C485BF-C137-4F05-A641-31DDCCC419CD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sayax.Tests", "Sayax.Tests\Sayax.Tests.csproj", "{09BE7393-0C10-4A2B-813C-9F3131143189}"
-EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Sayax.ui", "Sayax.ui\Sayax.ui.esproj", "{25952A11-0D0F-4566-90FB-DAD7C1C8A17A}"
 EndProject
 Global
@@ -37,10 +35,6 @@ Global
 		{02C485BF-C137-4F05-A641-31DDCCC419CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02C485BF-C137-4F05-A641-31DDCCC419CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02C485BF-C137-4F05-A641-31DDCCC419CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{09BE7393-0C10-4A2B-813C-9F3131143189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{09BE7393-0C10-4A2B-813C-9F3131143189}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{09BE7393-0C10-4A2B-813C-9F3131143189}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{09BE7393-0C10-4A2B-813C-9F3131143189}.Release|Any CPU.Build.0 = Release|Any CPU
 		{25952A11-0D0F-4566-90FB-DAD7C1C8A17A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{25952A11-0D0F-4566-90FB-DAD7C1C8A17A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25952A11-0D0F-4566-90FB-DAD7C1C8A17A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU

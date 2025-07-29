@@ -16,9 +16,16 @@ public class InvoiceController : ControllerBase
     }
 
     [HttpPost("calculate")]
-    public ActionResult<InvoiceResultDto> Calculate([FromBody] InvoiceRequestDto request)
+    public async Task<ActionResult<InvoiceResultDto>> CalculateAsync([FromBody] InvoiceRequestDto request)
     {
-        var result = _invoiceService.CalculateInvoice(request.CustomerId, request.Month);
+        var result = await _invoiceService.CalculateInvoiceAsync(request);
+        return Ok(result);
+    }
+
+    [HttpPost("calculate-all")]
+    public async Task<IActionResult> CalculateInvoicesForAll([FromQuery] DateTime month)
+    {
+        var result = await _invoiceService.CalculateInvoicesForAllCustomersAsync(month);
         return Ok(result);
     }
 }

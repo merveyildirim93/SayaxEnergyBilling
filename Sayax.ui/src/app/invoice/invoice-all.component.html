@@ -1,0 +1,24 @@
+<div class="container">
+  <h2 class="title">Tüm Müşteriler İçin Fatura Hesaplama</h2>
+
+  
+    <label for="month">Fatura Dönemi:</label>
+    <input id="month" type="date" [(ngModel)]="month" class="form-control" />
+    <button class="btn btn-primary" (click)="calculateAll()">Hesapla</button>
+
+
+  <div *ngIf="results.length > 0" class="result-section">
+    <h3>Hesaplama Sonuçları</h3>
+
+    <div *ngFor="let item of results" class="invoice-card">
+      <h4>{{ item.customerName }}</h4>
+      <ul>
+        <li><strong>Enerji Bedeli:</strong> {{ item.energyCost | number:'1.2-2' }} ₺</li>
+        <li><strong>Dağıtım Bedeli:</strong> {{ item.distributionCost | number:'1.2-2' }} ₺</li>
+        <li><strong>BTV:</strong> {{ item.btv | number:'1.2-2' }} ₺</li>
+        <li><strong>KDV:</strong> {{ item.kdv | number:'1.2-2' }} ₺</li>
+        <li><strong>Toplam:</strong> {{ item.totalInvoice | number:'1.2-2' }} ₺</li>
+      </ul>
+    </div>
+  </div>
+</div>

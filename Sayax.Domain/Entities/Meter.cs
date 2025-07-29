@@ -8,12 +8,13 @@ namespace Sayax.Domain.Entities
 {
     public class Meter
     {
-        public string Id { get; set; } // Sayaç ID'si: S1, S2, S3 gibi
+        public int Id { get; set; } 
+        public string ConsumptionType { get; set; } // Sayaç ID'si: S1, S2, S3 gibi
         public string SalesMethod { get; set; } // PTF+YEK, Tarife, vs.
         public string AboneGroup { get; set; } // Sanayi, Ticarethane
         public decimal BtvRate { get; set; }   // Belediye tüketim vergisi oranı
         public decimal KdvRate { get; set; }   // KDV oranı
-        public string Municipality { get; set; } // Örnek: Kadıköy
+        public string Municipality { get; set; } // Belediye 
         public string TariffName { get; set; }   // Sanayi vs.
 
         public decimal CommissionValue { get; set; }  // Sabit veya yüzde olarak

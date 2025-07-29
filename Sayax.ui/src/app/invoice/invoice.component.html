@@ -2,12 +2,13 @@
   <h2>Müşteri Faturası Hesapla</h2>
 
   <label>Müşteri:</label>
-  <select [(ngModel)]="request.customerId">
+  <select [(ngModel)]="request.customerId" class="form-control">
+    <option [value]="0" disabled selected>Seçiniz</option>
     <option *ngFor="let c of customers" [value]="c.id">{{ c.name }}</option>
   </select>
 
   <label>Tarih:</label>
-  <input type="date" [(ngModel)]="request.date" />
+  <input type="date" [(ngModel)]="request.month" />
 
   <button (click)="calculateInvoice()">Fatura Hesapla</button>
 

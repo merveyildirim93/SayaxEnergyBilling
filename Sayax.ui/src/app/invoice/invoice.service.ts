@@ -28,4 +28,12 @@ export class InvoiceService {
   calculateInvoice(request: InvoiceRequest): Observable<InvoiceResponse> {
     return this.http.post<InvoiceResponse>(`${this.baseUrl}/calculate`, request);
   }
+
+  calculateAllInvoices(month: string): Observable<InvoiceResponse[]> {
+    return this.http.post<InvoiceResponse[]>(
+      `${this.baseUrl}/calculate-all?month=${month}`,
+      {}
+    );
+  }
+
 }

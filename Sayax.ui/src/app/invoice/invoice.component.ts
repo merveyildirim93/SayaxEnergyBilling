@@ -1,38 +1,38 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { InvoiceService, InvoiceRequest, InvoiceResponse } from './invoice.service';
+import { CustomerService, CustomerDto } from '../customer/customer.service';
 
 @Component({
   selector: 'app-invoice',
   templateUrl: './invoice.component.html',
   standalone: false
 })
-export class InvoiceComponent {
-  request: {
-    customerId: number;
-    date: Date;
-  } = {
-      customerId: 1,
-      date: new Date()
-    };
+export class InvoiceComponent implements OnInit {
+  customers: CustomerDto[] = [];
 
-  customers = [
-    { id: 1, name: "Test Müşterisi" }
-  ];
+  request: InvoiceRequest = {
+    customerId: 0,
+    month: ''
+  };
 
   result?: InvoiceResponse;
 
-  constructor(private invoiceService: InvoiceService) { }
+  constructor(
+    private invoiceService: InvoiceService,
+    private customerService: CustomerService
+  ) { }
+
+  ngOnInit() {
+    this.customerService.getCustomers().subscribe({
+      next: (data: CustomerDto[]) => this.customers = data,
+      error: (err: any) => console.error('Müşteriler yüklenemedi', err)
+    });
+  }
 
   calculateInvoice() {
-    const selectedDate = new Date(this.request.date); // string → Date
-    const formattedDate = selectedDate.toISOString().slice(0, 10);
+    if (!this.request.customerId || !this.request.month) return;
 
-    const requestPayload: InvoiceRequest = {
-      customerId: this.request.customerId,
-      month: formattedDate
-    };
-
-    this.invoiceService.calculateInvoice(requestPayload).subscribe({
+    this.invoiceService.calculateInvoice(this.request).subscribe({
       next: (res) => this.result = res,
       error: (err) => console.error('Fatura hesaplanamadı', err)
     });

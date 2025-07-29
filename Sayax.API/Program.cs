@@ -13,6 +13,7 @@ builder.Services.AddDbContext<SayaxDbContext>(options =>
 
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<ITaxService, TaxService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IConsumptionRepository, ConsumptionRepository>();

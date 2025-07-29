@@ -16,9 +16,9 @@ public class TaxController : ControllerBase
     }
 
     [HttpPost("GetBtvReport")]
-    public ActionResult<List<BtvReportDto>> GetBtvReport([FromQuery] DateTime month)
+    public async Task<ActionResult<List<BtvReportDto>>> GetBtvReportAsync([FromQuery] DateTime month)
     {
-        var result = _taxService.GetBtvReport(month);
+        var result = await _taxService.GetBtvReportAsync(month);
         return Ok(result);
     }
 }

@@ -9,6 +9,7 @@ namespace Sayax.Application.Interfaces
 {
     public interface IInvoiceService
     {
-        InvoiceResultDto CalculateInvoice(int customerId, DateTime period);
+        Task<InvoiceResultDto> CalculateInvoiceAsync(InvoiceRequestDto request);
+        Task<List<InvoiceResultDto>> CalculateInvoicesForAllCustomersAsync(DateTime month);
     }
 }

@@ -7,6 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { InvoiceComponent } from './invoice/invoice.component';
+import { InvoiceAllComponent } from './invoice/invoice-all.component';
 import { MunicipalityComponent } from './municipality/municipality.component';
 
 @NgModule({
@@ -14,6 +15,7 @@ import { MunicipalityComponent } from './municipality/municipality.component';
     AppComponent,
     HomeComponent,
     InvoiceComponent,
+    InvoiceAllComponent,
     MunicipalityComponent
   ],
   imports: [

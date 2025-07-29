@@ -26,14 +26,10 @@ namespace Sayax.Application.Services
             _priceRepo = priceRepo;
         }
 
-        public List<BtvReportDto> GetBtvReport(DateTime period)
+        public async Task<List<BtvReportDto>> GetBtvReportAsync(DateTime period)
         {
-            var customers = new List<Customer>
-        {
-            _customerRepo.GetCustomerById(1),
-            _customerRepo.GetCustomerById(2),
-            _customerRepo.GetCustomerById(3)
-        }.Where(c => c != null).ToList();
+           
+            var customers = await _customerRepo.GetAllCustomersAsync();
 
             var ptfPrices = _priceRepo.GetPtfPricesByMonth(period);
             var staticPrices = _priceRepo.GetStaticPrices();
@@ -44,7 +40,7 @@ namespace Sayax.Application.Services
             {
                 foreach (var meter in customer.Meters)
                 {
-                    var consumptions = _consumptionRepo.GetConsumptionsByMeterAndMonth(meter.Id, period);
+                    var consumptions = _consumptionRepo.GetConsumptionsByMeterAndMonth(meter.ConsumptionType, period);
                     var totalConsumption = consumptions.Sum(c => c.ConsumptionMWh);
                     decimal energyCost = 0;
 
