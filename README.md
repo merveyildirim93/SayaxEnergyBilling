@@ -182,6 +182,12 @@ npm install
 ng serve
 ```
 
+### Database (MS SQL)
+
+```bash
+İlgili tabloların scriptleri Sayax.Domain katmanında yer alan SqlQueries klasörünün altına eklenmiştir.
+```
+
 > Backend: [https://localhost:7289](https://localhost:7289)
 > Frontend: [http://localhost:4200](http://localhost:4200)
 
