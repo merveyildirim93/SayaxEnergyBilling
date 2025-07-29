@@ -1,2 +1,0 @@
-﻿INSERT INTO Customers (Name)
-VALUES ('Test Müşterisi');
