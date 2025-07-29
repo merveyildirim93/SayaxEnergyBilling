@@ -73,29 +73,6 @@ KDV = (EnergyCost + DistributionCost + BTV) × KdvOranı
 ```
 TotalInvoice = EnergyCost + DistributionCost + BTV + KDV
 ```
-
----
-
-## 🧱 Excel - Entity Eşleşmeleri
-
-Excel dosyasından okunan her veri, ilgili Entity sınıfında aşağıdaki şekilde eşleşmektedir:
-
-| Excel Alanı                | Entity          | Alan Adı             |
-| -------------------------- | --------------- | -------------------- |
-| Abone No                   | Customer        | CustomerNumber       |
-| Abone Adı                  | Customer        | Name                 |
-| Tarife                     | StaticPrices    | TariffCode           |
-| Satış Tipi                 | StaticPrices    | SalesType            |
-| PTF                        | StaticPrices    | PtfPrice             |
-| YEK                        | StaticPrices    | YekPrice             |
-| Komisyon (%)               | StaticPrices    | CommissionRate       |
-| Komisyon (TL)              | StaticPrices    | CommissionAmount     |
-| Dağıtım Birim Fiyatı       | StaticPrices    | DistributionPrice    |
-| İndirim Oranı (%)          | StaticPrices    | DiscountRate         |
-| BTV Oranı                  | Meter           | BtvRate              |
-| Tüketim (kWh)              | Meter           | TotalConsumption     |
-| Belediyeler ve BTV toplamı | MunicipalityTax | Municipality, Amount |
-
 ---
 
 ## 📁 Proje Yapısı (Katmanlar)
