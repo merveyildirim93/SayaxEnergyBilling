@@ -5,12 +5,11 @@
   <input type="date" [(ngModel)]="date" />
   <button (click)="calculateTaxes()">Hesapla</button>
 
-
   <div *ngIf="report.length > 0">
     <h3>Sonuçlar</h3>
     <ul>
       <li *ngFor="let item of report">
-        <p><strong>{{ item.municipality }}:</strong> {{ item.amount | number:'1.2-2' }} ₺</p>
+        <p><strong>{{ item.customerName }} - {{ item.municipality }}:</strong> {{ item.btvAmount | number:'1.2-2' }} ₺</p>
       </li>
     </ul>
   </div>

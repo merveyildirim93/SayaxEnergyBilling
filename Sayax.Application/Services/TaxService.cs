@@ -28,7 +28,6 @@ namespace Sayax.Application.Services
 
         public async Task<List<BtvReportDto>> GetBtvReportAsync(DateTime period)
         {
-           
             var customers = await _customerRepo.GetAllCustomersAsync();
 
             var ptfPrices = _priceRepo.GetPtfPricesByMonth(period);

@@ -30,6 +30,14 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<List<Customer>> GetAllCustomersAsync()
     {
-        return _context.Customers.ToList();
+        return _context.Customers
+           .Select(c => new Customer
+           {
+               Id = c.Id,
+               Name = c.Name,
+               Meters = _context.Meters
+                   .Where(m => m.CustomerId == c.Id)
+                   .ToList()
+           }).ToList();
     }
 }
