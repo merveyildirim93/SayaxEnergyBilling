@@ -14,13 +14,13 @@ public class ConsumptionRepository : IConsumptionRepository
         _context = context;
     }
 
-    public List<HourlyConsumption> GetConsumptionsByMeterAndMonth(string meterId, DateTime period)
+    public List<HourlyConsumption> GetConsumptionsByMeterAndMonth(string ConsumptionType, DateTime period)
     {
-        var startDate = new DateTime(period.Year, period.Month, 1);
+        var startDate = new DateTime(period.Year, period.Month, period.Day);
         var endDate = startDate.AddMonths(1);
 
         return _context.HourlyConsumptions
-            .Where(c => c.MeterId == meterId && c.Date >= startDate && c.Date < endDate)
+            .Where(c => c.MeterId == ConsumptionType && c.Date >= startDate && c.Date < endDate)
             .ToList();
     }
 }

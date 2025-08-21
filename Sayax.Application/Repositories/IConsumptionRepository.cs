@@ -9,6 +9,6 @@ namespace Sayax.Application.Repositories
 {
     public interface IConsumptionRepository
     {
-        List<HourlyConsumption> GetConsumptionsByMeterAndMonth(string meterId, DateTime period);
+        List<HourlyConsumption> GetConsumptionsByMeterAndMonth(string ConsumptionType, DateTime period);
     }
 }
