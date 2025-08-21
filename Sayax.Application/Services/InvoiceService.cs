@@ -28,7 +28,7 @@ namespace Sayax.Application.Services
 
         public async Task<InvoiceResultDto> CalculateInvoiceAsync(InvoiceRequestDto request)
         {
-            var customer = await _customerRepo.GetCustomerById(request.CustomerId);
+            var customer = await _customerRepo.GetCustomerByIdAsync(request.CustomerId);
             if (customer == null)
                 throw new Exception("Müşteri bulunamadı");
 
@@ -129,7 +129,7 @@ namespace Sayax.Application.Services
 
         public async Task<InvoiceResultDto> CalculateInvoiceAsync_Old(InvoiceRequestDto request)
         {
-            var customer = await _customerRepo.GetCustomerById(request.CustomerId);
+            var customer = await _customerRepo.GetCustomerByIdAsync(request.CustomerId);
             if (customer == null)
                 throw new Exception("Müşteri bulunamadı");
 
