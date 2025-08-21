@@ -1,4 +1,5 @@
-﻿using Sayax.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using Sayax.Application.Interfaces;
 using Sayax.Application.Repositories;
 using Sayax.Domain.Entities;
 using Sayax.Infrastructure.Data;
@@ -14,30 +15,18 @@ public class CustomerRepository : ICustomerRepository
         _context = context;
     }
 
-    public async Task<Customer?> GetCustomerById(int id)
+    public async Task<Customer?> GetCustomerByIdAsync(int id)
     {
-        return _context.Customers
-            .Where(c => c.Id == id)
-            .Select(c => new Customer
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Meters = _context.Meters
-                    .Where(m => m.CustomerId == c.Id)
-                    .ToList()
-            }).FirstOrDefault();
+        return await _context.Customers
+            .Include(c => c.Meters)
+            .FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task<List<Customer>> GetAllCustomersAsync()
     {
-        return _context.Customers
-           .Select(c => new Customer
-           {
-               Id = c.Id,
-               Name = c.Name,
-               Meters = _context.Meters
-                   .Where(m => m.CustomerId == c.Id)
-                   .ToList()
-           }).ToList();
+        return await _context.Customers
+            .Include(c => c.Meters)
+            .ToListAsync();
     }
+
 }

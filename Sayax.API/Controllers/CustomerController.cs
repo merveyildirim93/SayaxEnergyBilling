@@ -1,8 +1,5 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Sayax.Application.Interfaces;
-using Sayax.Application.Services;
-using Sayax.Domain.Entities;
 
 namespace Sayax.API.Controllers
 {
