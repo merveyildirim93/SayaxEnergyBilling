@@ -23,7 +23,7 @@ public class InvoiceController : ControllerBase
     }
 
     [HttpPost("calculate-all")]
-    public async Task<IActionResult> CalculateInvoicesForAll([FromQuery] DateTime month)
+    public async Task<IActionResult> CalculateInvoicesForAllAsync([FromQuery] DateTime month)
     {
         var result = await _invoiceService.CalculateInvoicesForAllCustomersAsync(month);
         return Ok(result);

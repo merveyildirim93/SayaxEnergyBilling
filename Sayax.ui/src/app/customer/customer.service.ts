@@ -11,7 +11,7 @@ export interface CustomerDto {
   providedIn: 'root'
 })
 export class CustomerService {
-  private apiUrl = 'https://localhost:7289/api/customer/GetAllCustomers';
+  private apiUrl = 'https://localhost:7289/api/customer/getAll';
 
   constructor(private http: HttpClient) { }
 

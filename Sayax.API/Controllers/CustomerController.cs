@@ -15,8 +15,8 @@ namespace Sayax.API.Controllers
         {
                 _customerService = customerService;
         }
-        [HttpGet("GetAllCustomers")]
-        public async Task<IActionResult> GetAllCustomers()
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAllAsync()
         {
             var result = await _customerService.GetAllCustomers();
             return Ok(result);

@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sayax.Application\Sayax.Application.csproj" />
-    <ProjectReference Include="..\Sayax.Infrastructure\Sayax.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

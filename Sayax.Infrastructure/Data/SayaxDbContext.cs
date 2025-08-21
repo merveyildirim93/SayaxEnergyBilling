@@ -17,8 +17,7 @@ namespace Sayax.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Diğer entity konfigürasyonları...
-
+           
             modelBuilder.Entity<StaticPrices>()
                 .HasKey(s => s.Id);
 

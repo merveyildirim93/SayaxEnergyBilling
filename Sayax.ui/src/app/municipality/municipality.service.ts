@@ -14,7 +14,7 @@ export interface MunicipalityTax {
 })
 export class MunicipalityTaxService {
 
-  private apiUrl = 'https://localhost:7289/api/tax/GetBtvReport'; 
+  private apiUrl = 'https://localhost:7289/api/tax/btv-report'; 
 
   constructor(private http: HttpClient) { }
 
