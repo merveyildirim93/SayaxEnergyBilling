@@ -29,6 +29,8 @@ namespace Sayax.Application.Services
         public async Task<List<BtvReportDto>> GetBtvReportAsync(DateTime period)
         {
             var customers = await _customerRepo.GetAllCustomersAsync();
+            if (customers == null)
+                throw new Exception("Müşteri bulunamadı");
 
             var ptfPrices = _priceRepo.GetPtfPricesByMonth(period);
             var staticPrices = _priceRepo.GetStaticPrices();

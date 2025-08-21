@@ -50,7 +50,10 @@ namespace Sayax.Application.Services
                 {
                     foreach (var c in consumptions)
                     {
-                        var ptf = ptfPrices.FirstOrDefault(p => p.DateTime.Date == c.Date.Date && p.DateTime.Hour == c.Hour);
+                        // zaman kaymasını engellemek için -1
+                        var consumptionDateTime = c.Date.AddHours(c.Hour - 1);
+
+                        var ptf = ptfPrices.FirstOrDefault(p => p.DateTime == consumptionDateTime);
                         if (ptf != null)
                         {
                             meterEnergyCost += c.ConsumptionMWh * (ptf.PricePerMWh + staticPrices.YekPrice);
@@ -65,7 +68,7 @@ namespace Sayax.Application.Services
                     if (energyTariffDict.TryGetValue(meter.TariffName.Trim().ToLower(), out decimal tariffPrice))
                     {
                         meterEnergyCost = meterTotalConsumption * tariffPrice;
-                        meterEnergyCost *= (1 + meter.CommissionValue); // indirim değeri -0.03 gibi negatif
+                        meterEnergyCost *= (1 + meter.CommissionValue); 
                     }
                     else
                     {
