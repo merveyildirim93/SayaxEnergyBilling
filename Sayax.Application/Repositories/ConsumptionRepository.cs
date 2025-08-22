@@ -1,4 +1,4 @@
-﻿using Sayax.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
 using Sayax.Application.Repositories;
 using Sayax.Domain.Entities;
 using Sayax.Infrastructure.Data;
@@ -14,13 +14,14 @@ public class ConsumptionRepository : IConsumptionRepository
         _context = context;
     }
 
-    public List<HourlyConsumption> GetConsumptionsByMeterAndMonth(string ConsumptionType, DateTime period)
+    public async Task<List<HourlyConsumption>> GetConsumptionsByMeterAndMonthAsync(string meterId, DateTime period)
     {
         var startDate = new DateTime(period.Year, period.Month, period.Day);
         var endDate = startDate.AddMonths(1);
 
-        return _context.HourlyConsumptions
-            .Where(c => c.MeterId == ConsumptionType && c.Date >= startDate && c.Date < endDate)
-            .ToList();
+        return await _context.HourlyConsumptions
+            .Where(c => c.MeterId == meterId && c.Date >= startDate && c.Date < endDate)
+            .ToListAsync();
     }
 }
+

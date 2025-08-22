@@ -9,7 +9,7 @@ namespace Sayax.Application.Repositories
 {
     public interface IPriceRepository
     {
-        List<PtfPrice> GetPtfPricesByMonth(DateTime period);
-        StaticPrices GetStaticPrices(); // Sabit YEK, Tarife, Dağıtım bilgileri
+        Task<List<PtfPrice>> GetPtfPricesByMonthAsync(DateTime period);
+        Task<StaticPrices> GetStaticPricesAsync(); // Sabit YEK, Tarife, Dağıtım bilgileri
     }
 }

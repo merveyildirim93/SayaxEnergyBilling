@@ -1,12 +1,8 @@
 ﻿using Sayax.Application.DTOs;
+using Sayax.Application.Enums;
 using Sayax.Application.Interfaces;
 using Sayax.Application.Repositories;
 using Sayax.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sayax.Application.Services
 {
@@ -29,11 +25,16 @@ namespace Sayax.Application.Services
         public async Task<List<BtvReportDto>> GetBtvReportAsync(DateTime period)
         {
             var customers = await _customerRepo.GetAllCustomersAsync();
-            if (customers == null)
+            if (customers == null || !customers.Any())
                 throw new Exception("Müşteri bulunamadı");
 
-            var ptfPrices = _priceRepo.GetPtfPricesByMonth(period);
-            var staticPrices = _priceRepo.GetStaticPrices();
+            var ptfPrices = (await _priceRepo.GetPtfPricesByMonthAsync(period))
+                .ToDictionary(p => p.DateTime, p => p.PricePerMWh);
+
+            var staticPrices = await _priceRepo.GetStaticPricesAsync();
+
+            var energyTariffDict = staticPrices.EnergyTariffs
+                .ToDictionary(e => e.AboneGroup.Trim().ToLower(), e => e.Price);
 
             var btvReports = new List<BtvReportDto>();
 
@@ -41,37 +42,10 @@ namespace Sayax.Application.Services
             {
                 foreach (var meter in customer.Meters)
                 {
-                    var consumptions = _consumptionRepo.GetConsumptionsByMeterAndMonth(meter.ConsumptionType, period);
+                    var consumptions = await _consumptionRepo.GetConsumptionsByMeterAndMonthAsync(meter.ConsumptionType, period);
                     var totalConsumption = consumptions.Sum(c => c.ConsumptionMWh);
-                    decimal energyCost = 0;
 
-                    if (meter.SalesMethod.Contains("PTF"))
-                    {
-                        foreach (var c in consumptions)
-                        {
-                            var ptf = ptfPrices.FirstOrDefault(p => p.DateTime.Date == c.Date.Date && p.DateTime.Hour == c.Hour);
-                            if (ptf != null)
-                                energyCost += c.ConsumptionMWh * ptf.PricePerMWh;
-                        }
-                    }
-                    else if (meter.SalesMethod.Contains("Tarife"))
-                    {
-                        var energyTariffDict = staticPrices.EnergyTariffs.ToDictionary(e => e.AboneGroup, e => e.Price);
-
-                        energyCost = totalConsumption * energyTariffDict[meter.TariffName];
-
-                    }
-                    else if (meter.SalesMethod.Contains("YEK"))
-                    {
-                        energyCost = totalConsumption * staticPrices.YekPrice;
-                    }
-
-                    // Komisyon / İndirim
-                    if (meter.CommissionType == "Percentage")
-                        energyCost *= (1 + meter.CommissionValue);
-                    else if (meter.CommissionType == "Fixed")
-                        energyCost += meter.CommissionValue;
-
+                    decimal energyCost = CalculateEnergyCostForBtv(meter, consumptions, totalConsumption, ptfPrices, staticPrices, energyTariffDict);
                     decimal btv = energyCost * meter.BtvRate;
 
                     btvReports.Add(new BtvReportDto
@@ -86,5 +60,49 @@ namespace Sayax.Application.Services
 
             return btvReports;
         }
+
+        #region Private Helpers
+
+        private decimal CalculateEnergyCostForBtv(
+            Meter meter,
+            List<HourlyConsumption> consumptions,
+            decimal totalConsumption,
+            Dictionary<DateTime, decimal> ptfPrices,
+            StaticPrices staticPrices,
+            Dictionary<string, decimal> energyTariffDict)
+        {
+            decimal energyCost = 0;
+
+            if (meter.SalesMethod.Contains("PTF"))
+            {
+                foreach (var c in consumptions)
+                {
+                    var key = c.Date.AddHours(c.Hour - 1);
+                    if (ptfPrices.TryGetValue(key, out var ptfPrice))
+                        energyCost += c.ConsumptionMWh * ptfPrice;
+                }
+            }
+            else if (meter.SalesMethod.Contains("Tarife"))
+            {
+                if (!energyTariffDict.TryGetValue(meter.TariffName.Trim().ToLower(), out var tariffPrice))
+                    throw new Exception("Dağıtım tarifesi bulunamadı: " + meter.TariffName);
+
+                energyCost = totalConsumption * tariffPrice;
+            }
+            else if (meter.SalesMethod.Contains("YEK"))
+            {
+                energyCost = totalConsumption * staticPrices.YekPrice;
+            }
+
+            // Komisyon / İndirim
+            if (meter.CommissionType == CommissionTypes.Percentage)
+                energyCost *= (1 + meter.CommissionValue);
+            else if (meter.CommissionType == CommissionTypes.Fixed)
+                energyCost += meter.CommissionValue;
+
+            return energyCost;
+        }
+
+        #endregion
     }
 }
