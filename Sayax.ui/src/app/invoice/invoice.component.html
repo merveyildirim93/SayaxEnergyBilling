@@ -13,11 +13,9 @@
   <button (click)="calculateInvoice()">Fatura Hesapla</button>
 
   <div *ngIf="result">
-    <h3>Fatura Sonucu</h3>
-    <p><strong>Enerji Bedeli:</strong> {{ result.energyCost | number:'1.2-2' }} ₺</p>
-    <p><strong>Dağıtım Bedeli:</strong> {{ result.distributionCost | number:'1.2-2' }} ₺</p>
-    <p><strong>BTV:</strong> {{ result.btv | number:'1.2-2' }} ₺</p>
-    <p><strong>KDV:</strong> {{ result.kdv | number:'1.2-2' }} ₺</p>
-    <p><strong>Toplam:</strong> {{ result.totalInvoice | number:'1.2-2' }} ₺</p>
+    <app-invoice-card [invoice]="result"
+                      [month]="request.month"
+                      (recalculate)="recalculateSingle($event.customerId, $event.month)">
+    </app-invoice-card>
   </div>
 </div>

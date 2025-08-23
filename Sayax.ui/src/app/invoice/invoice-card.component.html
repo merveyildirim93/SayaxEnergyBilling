@@ -1,0 +1,12 @@
+<div class="invoice-card card p-3 mb-3">
+  <h4>{{ invoice.customerName }}</h4>
+  <ul>
+    <li><strong>Enerji Bedeli:</strong> {{ invoice.energyCost | number:'1.2-2' }} ₺</li>
+    <li><strong>Dağıtım Bedeli:</strong> {{ invoice.distributionCost | number:'1.2-2' }} ₺</li>
+    <li><strong>BTV:</strong> {{ invoice.btv | number:'1.2-2' }} ₺</li>
+    <li><strong>KDV:</strong> {{ invoice.kdv | number:'1.2-2' }} ₺</li>
+    <li><strong>Toplam:</strong> {{ invoice.totalInvoice | number:'1.2-2' }} ₺</li>
+  </ul>
+
+  <button class="btn btn-warning" (click)="recalc()">Yeniden Hesapla</button>
+</div>

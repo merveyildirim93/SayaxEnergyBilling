@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './home/home.component';
+import { HomeComponent } from './home/home.component'; 
 import { InvoiceComponent } from './invoice/invoice.component';
 import { InvoiceAllComponent } from './invoice/invoice-all.component';
 import { MunicipalityComponent } from './municipality/municipality.component';

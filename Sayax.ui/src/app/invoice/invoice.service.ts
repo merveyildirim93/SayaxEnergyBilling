@@ -21,7 +21,7 @@ export interface InvoiceResponse {
   providedIn: 'root'
 })
 export class InvoiceService {
-  private baseUrl = 'https://localhost:7289/api/invoice'; // .NET API URL
+  private baseUrl = 'https://localhost:7289/api/invoice'; 
 
   constructor(private http: HttpClient) {}
 
