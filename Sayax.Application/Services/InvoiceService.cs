@@ -1,4 +1,5 @@
-﻿using Sayax.Application.DTOs;
+﻿using Microsoft.Extensions.Logging;
+using Sayax.Application.DTOs;
 using Sayax.Application.Enums;
 using Sayax.Application.Interfaces;
 using Sayax.Application.Repositories;
@@ -12,21 +13,30 @@ namespace Sayax.Application.Services
         private readonly ICustomerRepository _customerRepo;
         private readonly IConsumptionRepository _consumptionRepo;
         private readonly IPriceRepository _priceRepo;
+        private readonly ILogger<InvoiceService> _logger;
+
 
         public InvoiceService(
             ICustomerRepository customerRepo,
             IConsumptionRepository consumptionRepo,
-            IPriceRepository priceRepo)
+            IPriceRepository priceRepo,
+            ILogger<InvoiceService> logger)
+
         {
             _customerRepo = customerRepo;
             _consumptionRepo = consumptionRepo;
             _priceRepo = priceRepo;
+            _logger = logger;
         }
 
         public async Task<InvoiceResultDto> CalculateInvoiceAsync(InvoiceRequestDto request)
         {
             var customer = await _customerRepo.GetCustomerByIdAsync(request.CustomerId);
-            if (customer == null) throw new Exception("Müşteri bulunamadı");
+            if (customer == null)
+            {
+                _logger.LogError($"Müşteri bulunamadı. CustomerId: {request.CustomerId}");
+                return new InvoiceResultDto();
+            }
 
             var staticPrices = await _priceRepo.GetStaticPricesAsync();
             var ptfDict = (await _priceRepo.GetPtfPricesByMonthAsync(request.Month))
@@ -43,6 +53,13 @@ namespace Sayax.Application.Services
             foreach (var meter in customer.Meters)
             {
                 var consumptions = await _consumptionRepo.GetConsumptionsByMeterAndMonthAsync(meter.ConsumptionType, request.Month);
+
+                if (consumptions == null || consumptions.Count == 0)
+                {
+                    _logger.LogError($"Tüketim verisi bulunamadı. MeterId: {meter.Id}, Month: {request.Month}");
+                    continue;
+                }
+
                 var meterTotalConsumption = consumptions.Sum(c => c.ConsumptionMWh);
 
                 decimal meterEnergyCost = CalculateEnergyCost(meter, consumptions, staticPrices, ptfDict, energyTariffDict);
@@ -107,21 +124,23 @@ namespace Sayax.Application.Services
                 foreach (var c in consumptions)
                 {
                     var consumptionDateTime = c.Date.AddHours(c.Hour - 1);
-                    if (ptfDict.TryGetValue(consumptionDateTime, out var pricePerMWh))
-                        meterEnergyCost += c.ConsumptionMWh * (pricePerMWh + staticPrices.YekPrice);
+                    if (!ptfDict.TryGetValue(consumptionDateTime, out var pricePerMWh))
+                    {
+                        _logger.LogError($"PTF fiyatı bulunamadı. DateTime: {consumptionDateTime}, MeterId: {meter.Id}");
+                        continue;
+                    }
+                    meterEnergyCost += c.ConsumptionMWh * (pricePerMWh + staticPrices.YekPrice);
                 }
             }
             else if (meter.SalesMethod.Contains(SalesMethods.TarifeIndirim))
             {
-                if (energyTariffDict.TryGetValue(meter.TariffName.Trim().ToLower(), out decimal tariffPrice))
+                if (!energyTariffDict.TryGetValue(meter.TariffName.Trim().ToLower(), out decimal tariffPrice))
                 {
-                    meterEnergyCost = meterTotalConsumption * tariffPrice;
-                    meterEnergyCost *= (1 + meter.CommissionValue);
+                    _logger.LogError($"Enerji tarifesi bulunamadı. TariffName: {meter.TariffName}, MeterId: {meter.Id}");
                 }
-                else
-                {
-                    throw new Exception("Dağıtım tarifesi bulunamadı: " + meter.TariffName);
-                }
+
+                meterEnergyCost = meterTotalConsumption * tariffPrice;
+                meterEnergyCost *= (1 + meter.CommissionValue);
             }
             else if (meter.SalesMethod.Contains(SalesMethods.Yek) && !meter.SalesMethod.Contains(SalesMethods.Ptf))
             {
@@ -141,7 +160,9 @@ namespace Sayax.Application.Services
         {
             var key = meter.TariffName.Trim().ToLower();
             if (!distributionTariffDict.TryGetValue(key, out decimal distPrice))
-            throw new Exception("Dağıtım tarifesi bulunamadı: " + meter.TariffName);
+            {
+                _logger.LogError($"Dağıtım tarifesi bulunamadı. TariffName: {meter.TariffName}, MeterId: {meter.Id}");
+            }
 
             return meterTotalConsumption * distPrice;
         }

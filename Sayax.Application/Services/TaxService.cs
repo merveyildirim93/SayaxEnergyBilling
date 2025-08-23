@@ -1,8 +1,10 @@
-﻿using Sayax.Application.DTOs;
+﻿using Microsoft.Extensions.Logging;
+using Sayax.Application.DTOs;
 using Sayax.Application.Enums;
 using Sayax.Application.Interfaces;
 using Sayax.Application.Repositories;
 using Sayax.Domain.Entities;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Sayax.Application.Services
 {
@@ -11,54 +13,83 @@ namespace Sayax.Application.Services
         private readonly ICustomerRepository _customerRepo;
         private readonly IConsumptionRepository _consumptionRepo;
         private readonly IPriceRepository _priceRepo;
+        private readonly ILogger<InvoiceService> _logger;
 
         public TaxService(
             ICustomerRepository customerRepo,
             IConsumptionRepository consumptionRepo,
-            IPriceRepository priceRepo)
+            IPriceRepository priceRepo,
+            ILogger<InvoiceService> logger)
         {
             _customerRepo = customerRepo;
             _consumptionRepo = consumptionRepo;
             _priceRepo = priceRepo;
+            _logger = logger;
         }
 
         public async Task<List<BtvReportDto>> GetBtvReportAsync(DateTime period)
         {
-            var customers = await _customerRepo.GetAllCustomersAsync();
-            if (customers == null || !customers.Any())
-                throw new Exception("Müşteri bulunamadı");
-
-            var ptfPrices = (await _priceRepo.GetPtfPricesByMonthAsync(period))
-                .ToDictionary(p => p.DateTime, p => p.PricePerMWh);
-
-            var staticPrices = await _priceRepo.GetStaticPricesAsync();
-
-            var energyTariffDict = staticPrices.EnergyTariffs
-                .ToDictionary(e => e.AboneGroup.Trim().ToLower(), e => e.Price);
-
-            var btvReports = new List<BtvReportDto>();
-
-            foreach (var customer in customers)
+            try
             {
-                foreach (var meter in customer.Meters)
+                var customers = await _customerRepo.GetAllCustomersAsync();
+                if (customers == null || !customers.Any())
                 {
-                    var consumptions = await _consumptionRepo.GetConsumptionsByMeterAndMonthAsync(meter.ConsumptionType, period);
-                    var totalConsumption = consumptions.Sum(c => c.ConsumptionMWh);
-
-                    decimal energyCost = CalculateEnergyCostForBtv(meter, consumptions, totalConsumption, ptfPrices, staticPrices, energyTariffDict);
-                    decimal btv = energyCost * meter.BtvRate;
-
-                    btvReports.Add(new BtvReportDto
-                    {
-                        CustomerId = customer.Id,
-                        CustomerName = customer.Name,
-                        Municipality = meter.Municipality,
-                        BtvAmount = Math.Round(btv, 2)
-                    });
+                    _logger.LogError($"BTV raporu hesaplanamadı: müşteri bulunamadı. Period: {period}");
                 }
-            }
 
-            return btvReports;
+                var ptfPrices = (await _priceRepo.GetPtfPricesByMonthAsync(period))
+                    .ToDictionary(p => p.DateTime, p => p.PricePerMWh);
+
+                var staticPrices = await _priceRepo.GetStaticPricesAsync();
+
+                var energyTariffDict = staticPrices.EnergyTariffs
+                    .ToDictionary(e => e.AboneGroup.Trim().ToLower(), e => e.Price);
+
+                var btvReports = new List<BtvReportDto>();
+
+                foreach (var customer in customers)
+                {
+                    foreach (var meter in customer.Meters)
+                    {
+                        var consumptions = await _consumptionRepo.GetConsumptionsByMeterAndMonthAsync(meter.ConsumptionType, period);
+                        if (consumptions == null || consumptions.Count == 0)
+                        {
+                            _logger.LogError($"Tüketim verisi bulunamadı. CustomerId: {customer.Id}, MeterId: {meter.Id}, Period: {period}");
+                            continue;
+                        }
+
+                        var totalConsumption = consumptions.Sum(c => c.ConsumptionMWh);
+
+                        decimal energyCost;
+                        try
+                        {
+                            energyCost = CalculateEnergyCostForBtv(meter, consumptions, totalConsumption, ptfPrices, staticPrices, energyTariffDict);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Enerji maliyeti hesaplanamadı. CustomerId: {customer.Id}, MeterId: {meter.Id}, Period: {period}");
+                            continue;
+                        }
+
+                        decimal btv = energyCost * meter.BtvRate;
+
+                        btvReports.Add(new BtvReportDto
+                        {
+                            CustomerId = customer.Id,
+                            CustomerName = customer.Name,
+                            Municipality = meter.Municipality,
+                            BtvAmount = Math.Round(btv, 2)
+                        });
+                    }
+                }
+
+                return btvReports;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"BTV raporu genel hata. Period: {period}");
+                throw; 
+            }
         }
 
         #region Private Helpers
@@ -78,19 +109,33 @@ namespace Sayax.Application.Services
                 foreach (var c in consumptions)
                 {
                     var key = c.Date.AddHours(c.Hour - 1);
-                    if (ptfPrices.TryGetValue(key, out var ptfPrice))
-                        energyCost += c.ConsumptionMWh * ptfPrice;
+                    if (!ptfPrices.TryGetValue(key, out var ptfPrice))
+                    {
+                        _logger.LogError($"PTF fiyatı bulunamadı. Tarih: {c.Date}, Saat: {c.Hour}, MeterId: {meter.Id}");
+                        continue;
+                        //buraya iş kuralları getirilebilir.
+                    }
+
+                    energyCost += c.ConsumptionMWh * ptfPrice;
                 }
             }
             else if (meter.SalesMethod.Contains("Tarife"))
             {
                 if (!energyTariffDict.TryGetValue(meter.TariffName.Trim().ToLower(), out var tariffPrice))
-                    throw new Exception("Dağıtım tarifesi bulunamadı: " + meter.TariffName);
+                {
+                    _logger.LogError($"Dağıtım tarifesi bulunamadı. Tarife: {meter.TariffName}, MeterId: {meter.Id}");
+                    //buraya iş kuralları getirilebilir.
+                }
 
                 energyCost = totalConsumption * tariffPrice;
             }
             else if (meter.SalesMethod.Contains("YEK"))
             {
+                if (staticPrices.YekPrice <= 0)
+                {
+                    _logger.LogError($"YEK fiyatı geçersiz. YekPrice: {staticPrices.YekPrice}");
+                }
+
                 energyCost = totalConsumption * staticPrices.YekPrice;
             }
 
@@ -104,5 +149,6 @@ namespace Sayax.Application.Services
         }
 
         #endregion
+
     }
 }
