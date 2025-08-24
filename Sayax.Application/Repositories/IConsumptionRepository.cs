@@ -10,5 +10,6 @@ namespace Sayax.Application.Repositories
     public interface IConsumptionRepository
     {
         Task<List<HourlyConsumption>> GetConsumptionsByMeterAndMonthAsync(string meterId, DateTime period);
+        Task<Dictionary<string, List<HourlyConsumption>>> GetConsumptionsByMeterAndMonthForBtvAsync(List<string> meterIds, DateTime period);
     }
 }
