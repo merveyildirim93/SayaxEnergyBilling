@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 public class RedisContext
@@ -6,25 +6,26 @@ public class RedisContext
     private readonly ConnectionMultiplexer _muxer;
     public IDatabase Db => _muxer.GetDatabase();
 
-    public RedisContext(IConfiguration configuration)
+    public RedisContext(IOptions<RedisSettings> settings)
     {
-        var redisConfig = configuration.GetSection("Redis");
-        string host = redisConfig["Host"];
-        int port = int.Parse(redisConfig["Port"] ?? "11915");
-        string user = redisConfig["User"];
-        string password = redisConfig["Password"];
-        bool ssl = bool.Parse(redisConfig["Ssl"] ?? "true");
-        bool abortConnect = bool.Parse(redisConfig["AbortConnect"] ?? "false");
-
-        var config = new ConfigurationOptions
+        var cfg = new ConfigurationOptions
         {
-            EndPoints = { { host, port } },
-            User = user,
-            Password = password,
-            Ssl = ssl,
-            AbortOnConnectFail = abortConnect
+            EndPoints = { { settings.Value.Host, settings.Value.Port } },
+            Password = settings.Value.Password, 
+            Ssl = settings.Value.Ssl,
+            AbortOnConnectFail = settings.Value.AbortConnect,
+            ConnectTimeout = 10000
         };
 
-        _muxer = ConnectionMultiplexer.Connect(config);
+        _muxer = ConnectionMultiplexer.Connect(cfg);
+    }
+
+    public class RedisSettings
+    {
+        public string Host { get; set; }
+        public int Port { get; set; }
+        public string Password { get; set; }
+        public bool Ssl { get; set; }
+        public bool AbortConnect { get; set; }
     }
 }

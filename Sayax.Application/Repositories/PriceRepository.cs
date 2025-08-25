@@ -2,6 +2,7 @@
 using Sayax.Application.Repositories;
 using Sayax.Domain.Entities;
 using Sayax.Infrastructure.Data;
+using StackExchange.Redis;
 using System.Text.Json;
 
 namespace Sayax.Infrastructure.Repositories;

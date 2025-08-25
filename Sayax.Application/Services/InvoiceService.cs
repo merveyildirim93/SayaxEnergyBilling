@@ -36,7 +36,7 @@ namespace Sayax.Application.Services
                 _logger.LogError($"Müşteri bulunamadı. CustomerId: {request.CustomerId}");
                 return new InvoiceResultDto();
             }
-            var staticPrices = await _priceRepo.GetStaticPricesAsync(period);
+            var staticPrices = await _priceRepo.GetStaticPricesAsync(request.Month);
             var ptfDict = (await _priceRepo.GetPtfPricesByMonthAsync(request.Month))
                 .ToDictionary(p => p.DateTime, p => p.PricePerMWh);
 
