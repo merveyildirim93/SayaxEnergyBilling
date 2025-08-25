@@ -4,7 +4,6 @@ using Sayax.Application.Enums;
 using Sayax.Application.Interfaces;
 using Sayax.Application.Repositories;
 using Sayax.Domain.Entities;
-using System.Linq;
 
 namespace Sayax.Application.Services
 {
@@ -37,8 +36,7 @@ namespace Sayax.Application.Services
                 _logger.LogError($"Müşteri bulunamadı. CustomerId: {request.CustomerId}");
                 return new InvoiceResultDto();
             }
-
-            var staticPrices = await _priceRepo.GetStaticPricesAsync();
+            var staticPrices = await _priceRepo.GetStaticPricesAsync(period);
             var ptfDict = (await _priceRepo.GetPtfPricesByMonthAsync(request.Month))
                 .ToDictionary(p => p.DateTime, p => p.PricePerMWh);
 

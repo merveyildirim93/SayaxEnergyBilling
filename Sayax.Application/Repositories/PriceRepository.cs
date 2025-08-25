@@ -2,13 +2,19 @@
 using Sayax.Application.Repositories;
 using Sayax.Domain.Entities;
 using Sayax.Infrastructure.Data;
+using System.Text.Json;
 
 namespace Sayax.Infrastructure.Repositories;
 
 public class PriceRepository : IPriceRepository
 {
     private readonly SayaxDbContext _context;
-    public PriceRepository(SayaxDbContext context) => _context = context;
+    private readonly RedisContext _rediscontext;
+    public PriceRepository(SayaxDbContext context, RedisContext rediscontext)
+    {
+        _context = context;
+        _rediscontext = rediscontext;
+    }
 
     public async Task<List<PtfPrice>> GetPtfPricesByMonthAsync(DateTime period)
     {
@@ -19,12 +25,38 @@ public class PriceRepository : IPriceRepository
             .ToListAsync();
     }
 
-    public async Task<StaticPrices> GetStaticPricesAsync()
+    public async Task<StaticPrices> GetStaticPricesAsync(DateTime period)
     {
-        return await _context.StaticPrices
-            .Include(sp => sp.EnergyTariffs)
-            .Include(sp => sp.DistributionTariffs)
-            .FirstAsync();
+        string cacheKey = $"StaticPrices:{period:yyyy-MM}";
+        var staticPrices = new StaticPrices();
+
+        // Redis'ten bilgiyi çektik
+        var cachedValue = await _rediscontext.Db.StringGetAsync(cacheKey);
+        if (cachedValue.HasValue)
+        {
+            staticPrices = JsonSerializer.Deserialize<StaticPrices>(cachedValue)!;
+        }
+        else
+        {
+            // Redis'te yoksa DB'den çektik
+            staticPrices = await _context.StaticPrices
+                .Include(sp => sp.EnergyTariffs)
+                .Include(sp => sp.DistributionTariffs)
+                .FirstAsync();
+
+
+            // JSON olarak Redis'e yazdırıyoruz (TTL 1 saat ayarlandı)
+            var options = new JsonSerializerOptions
+            {
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+                WriteIndented = false
+            };
+
+            string json = JsonSerializer.Serialize(staticPrices, options);
+            await _rediscontext.Db.StringSetAsync(cacheKey, json, TimeSpan.FromHours(1));
+        }
+
+        return staticPrices;
     }
 }
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Sayax.Application.DTOs;
 using Sayax.Application.Enums;
 using Sayax.Application.Interfaces;
@@ -45,7 +44,7 @@ namespace Sayax.Application.Services
                 var ptfPrices = (await _priceRepo.GetPtfPricesByMonthAsync(period))
                     .ToDictionary(p => p.DateTime, p => p.PricePerMWh);
 
-                var staticPrices = await _priceRepo.GetStaticPricesAsync();
+                var staticPrices = await _priceRepo.GetStaticPricesAsync(period);
                 var energyTariffDict = staticPrices.EnergyTariffs
                     .ToDictionary(e => e.AboneGroup.Trim().ToLower(), e => e.Price);
 

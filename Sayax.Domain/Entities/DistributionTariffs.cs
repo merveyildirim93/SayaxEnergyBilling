@@ -13,7 +13,6 @@ namespace Sayax.Domain.Entities
         public decimal Price { get; set; }
 
         public int StaticPricesId { get; set; }
-        public StaticPrices StaticPrices { get; set; }
     }
 
 }
